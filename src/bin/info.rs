@@ -3,6 +3,7 @@ extern crate smd_music;
 
 use clap::{App, Arg};
 use smd_music::smd::SMD;
+use smd_music::smd::track::event::Event;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -33,5 +34,19 @@ fn main() {
             track.channel_id,
             track.events.len()
         );
+        let mut nb_noteplay = 0u32;
+        let mut nb_delta_time = 0u32;
+        let mut nb_wait = 0u32;
+        for event in track.events {
+            match event {
+                Event::NotePlay(_) => nb_noteplay += 1,
+                Event::DeltaTime(_) => nb_delta_time += 1,
+                Event::Wait1Byte(_) | Event::Wait2Byte(_) | Event::WaitAdd(_) | Event::WaitAgain => nb_wait += 1,
+                _ => {}
+            }
+        }
+        println!("    {} Note Play events", nb_noteplay);
+        println!("    {} Delta Time events", nb_delta_time);
+        println!("    {} Wait events", nb_wait);
     }
 }

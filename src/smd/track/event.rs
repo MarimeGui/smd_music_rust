@@ -34,6 +34,7 @@ pub struct NotePlay {
     pub length: Option<u32>,
 }
 
+#[derive(Clone)]
 pub enum OctaveChange {
     Down2 = 0x0,
     Down1 = 0x10,
@@ -41,6 +42,7 @@ pub enum OctaveChange {
     Up1 = 0x30,
 }
 
+#[derive(Clone)]
 pub enum Key {
     C = 0x00,
     CSharp = 0x01,
@@ -138,6 +140,10 @@ impl NotePlay {
             key,
             length,
         })
+    }
+    /// Calculates the frequency for this note
+    pub fn calc_frequency(&self) -> f64 {
+        2f64.powf(f64::from((self.key.clone() as u16 + self.octave_change.clone() as u16) - 41u16)/12f64) * 440f64
     }
 }
 
