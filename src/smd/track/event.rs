@@ -194,4 +194,25 @@ impl DeltaTime {
         let value = reader.read_to_u8()?;
         Ok(DeltaTime { value })
     }
+    pub fn get_delay_ticks(&self) -> u8 {
+        match self.value {
+            0x80 => 96,
+            0x81 => 72,
+            0x82 => 64,
+            0x83 => 48,
+            0x84 => 36,
+            0x85 => 32,
+            0x86 => 24,
+            0x87 => 18,
+            0x88 => 16,
+            0x89 => 12,
+            0x8A => 9,
+            0x8B => 8,
+            0x8C => 6,
+            0x8D => 4,
+            0x8E => 3,
+            0x8F => 2,
+            _ => panic!()  // Unreachable
+        }
+    }
 }
