@@ -142,14 +142,14 @@ impl NotePlay {
         })
     }
     /// Calculates the frequency for this note
-    pub fn calc_frequency(&self) -> f64 {
-        let key_number = self.key.clone() as u16 + match self.octave_change {
-            OctaveChange::Down2 => 16,
-            OctaveChange::Down1 => 28,
-            OctaveChange::NoChange => 40,
-            OctaveChange::Up1 => 52
+    pub fn calc_frequency(&self, octave: u8) -> f64 {
+        let key_number = (4 + ((i32::from(octave) - 1) * 12)) + self.key.clone() as i32 + match self.octave_change {
+            OctaveChange::Down2 => -24,
+            OctaveChange::Down1 => -12,
+            OctaveChange::NoChange => 0,
+            OctaveChange::Up1 => 12
         };
-        2f64.powf(f64::from(key_number - 49u16)/12f64) * 440f64
+        2f64.powf(f64::from(key_number - 49i32)/12f64) * 440f64
     }
 }
 
