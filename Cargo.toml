@@ -7,7 +7,6 @@ authors = ["MarimeGui <lepro.guillaume@gmail.com>"]
 name = "smd_music"
 
 [dependencies]
-chrono = "0.4"
 clap = "2.31.2"
 magic_number = { git = "https://github.com/MarimeGui/magic_number_rust.git" }
 ez_io = { git = "https://github.com/MarimeGui/ez_io" }

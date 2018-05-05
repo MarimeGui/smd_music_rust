@@ -2,8 +2,8 @@ extern crate clap;
 extern crate smd_music;
 
 use clap::{App, Arg};
-use smd_music::smd::SMD;
 use smd_music::smd::track::event::Event;
+use smd_music::smd::SMD;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -22,7 +22,6 @@ fn main() {
     let reader = &mut BufReader::new(File::open(matches.value_of("INPUT").unwrap()).unwrap());
     let smd = SMD::import(reader).unwrap();
     println!("File Name: {}", smd.header.name);
-    println!("Exported At {}", smd.header.export_date);
     println!(
         "{} tracks, {} channels",
         smd.song.nb_tracks, smd.song.nb_channels
@@ -41,7 +40,10 @@ fn main() {
             match event {
                 Event::NotePlay(_) => nb_noteplay += 1,
                 Event::DeltaTime(_) => nb_delta_time += 1,
-                Event::Wait1Byte(_) | Event::Wait2Byte(_) | Event::WaitAdd(_) | Event::WaitAgain => nb_wait += 1,
+                Event::Wait1Byte(_)
+                | Event::Wait2Byte(_)
+                | Event::WaitAdd(_)
+                | Event::WaitAgain => nb_wait += 1,
                 _ => {}
             }
         }

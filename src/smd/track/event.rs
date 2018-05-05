@@ -36,7 +36,7 @@ pub struct NotePlay {
 
 #[derive(Clone)]
 pub enum OctaveChange {
-    Down2 = 0x0,
+    Reset = 0x0,
     Down1 = 0x10,
     NoChange = 0x20,
     Up1 = 0x30,
@@ -143,20 +143,15 @@ impl NotePlay {
     }
     /// Calculates the frequency for this note
     pub fn calc_frequency(&self, octave: u8) -> f64 {
-        let key_number = (4 + ((i32::from(octave) - 1) * 12)) + self.key.clone() as i32 + match self.octave_change {
-            OctaveChange::Down2 => -24,
-            OctaveChange::Down1 => -12,
-            OctaveChange::NoChange => 0,
-            OctaveChange::Up1 => 12
-        };
-        2f64.powf(f64::from(key_number - 49i32)/12f64) * 440f64
+        let key_number = (4 + ((i32::from(octave) - 1) * 12)) + self.key.clone() as i32;
+        2f64.powf(f64::from(key_number - 49i32) / 12f64) * 440f64
     }
 }
 
 impl OctaveChange {
     pub fn get(key_flags: u8) -> OctaveChange {
         match key_flags & 0x30 {
-            0x00 => OctaveChange::Down2,
+            0x00 => OctaveChange::Reset,
             0x10 => OctaveChange::Down1,
             0x20 => OctaveChange::NoChange,
             0x30 => OctaveChange::Up1,
@@ -212,7 +207,7 @@ impl DeltaTime {
             0x8D => 4,
             0x8E => 3,
             0x8F => 2,
-            _ => panic!()  // Unreachable
+            _ => panic!(), // Unreachable
         }
     }
 }
