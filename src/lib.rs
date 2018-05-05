@@ -1,4 +1,3 @@
-extern crate chrono;
 extern crate ez_io;
 extern crate magic_number;
 
