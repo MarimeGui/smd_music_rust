@@ -1,8 +1,7 @@
-use ez_io::ReadE;
-use magic_number::check_magic_number;
-use std::error::Error;
+use ez_io::{MagicNumberCheck, ReadE};
 use std::io::{Read, Seek, SeekFrom};
 use util::SeekAlign;
+use Result;
 
 pub struct HeaderChunk {
     pub instrument_group_id: u8,
@@ -21,8 +20,8 @@ pub struct Date {
 }
 
 impl HeaderChunk {
-    pub fn import<R: Read + Seek>(reader: &mut R) -> Result<Self, Box<Error>> {
-        check_magic_number(reader, vec![b's', b'm', b'd', b'l'])?;
+    pub fn import<R: Read + Seek>(reader: &mut R) -> Result<Self> {
+        reader.check_magic_number(&[b's', b'm', b'd', b'l'])?;
         reader.seek(SeekFrom::Current(4))?; // Null
         reader.seek(SeekFrom::Current(4))?; // File size
         reader.seek(SeekFrom::Current(2))?; // ???
@@ -30,7 +29,19 @@ impl HeaderChunk {
         reader.seek(SeekFrom::Current(1))?; // ?
         reader.seek(SeekFrom::Current(8))?; // Null
         let creation_date = Date::import(reader)?;
-        let name = reader.read_to_string_n(16)?; // Might not work, has 0s
+        let name = {
+            let mut buf = vec![0u8; 16];
+            reader.read_exact(&mut buf)?;
+            let mut keep_buf = Vec::new();
+            for byte in buf {
+                if byte != 0 {
+                    keep_buf.push(byte)
+                } else {
+                    break;
+                }
+            }
+            String::from_utf8(keep_buf)?
+        };
         reader.seek(SeekFrom::Current(8))?;
         reader.align_16()?;
         Ok(HeaderChunk {
@@ -42,7 +53,7 @@ impl HeaderChunk {
 }
 
 impl Date {
-    pub fn import<R: Read>(reader: &mut R) -> Result<Self, Box<Error>> {
+    pub fn import<R: Read>(reader: &mut R) -> Result<Self> {
         let year = reader.read_le_to_u16()?;
         let month = reader.read_to_u8()?;
         let day = reader.read_to_u8()?;

@@ -1,5 +1,6 @@
 extern crate ez_io;
-extern crate magic_number;
+
+type Result<T> = std::result::Result<T, error::SMDError>;
 
 mod error;
 pub mod smd;

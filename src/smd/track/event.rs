@@ -1,7 +1,8 @@
-use error::EventImport as EventImportError;
+use error::SMDError;
 use ez_io::ReadE;
 use std::io::Result as IoResult;
 use std::io::{Read, Seek, SeekFrom};
+use Result;
 
 pub enum Event {
     NotePlay(NotePlay),
@@ -35,6 +36,7 @@ pub struct NotePlay {
 }
 
 #[derive(Clone)]
+#[repr(u8)]
 pub enum OctaveChange {
     Reset = 0x0,
     Down1 = 0x10,
@@ -43,6 +45,7 @@ pub enum OctaveChange {
 }
 
 #[derive(Clone)]
+#[repr(u8)]
 pub enum Key {
     C = 0x00,
     CSharp = 0x01,
@@ -67,7 +70,7 @@ pub struct DeltaTime {
 }
 
 impl Event {
-    pub fn import<R: Read + Seek>(reader: &mut R) -> Result<Event, EventImportError> {
+    pub fn import<R: Read + Seek>(reader: &mut R) -> Result<Event> {
         let op_code = reader.read_to_u8()?;
         Ok(match op_code {
             0x00...0x7f => {
@@ -111,7 +114,7 @@ impl Event {
             0xE2 => Event::UnknownEventThree([reader.read_to_u8()?; 3]),
             0xEA => Event::UnknownEventThree([reader.read_to_u8()?; 3]),
             0xDC => Event::UnknownEventFive([reader.read_to_u8()?; 5]),
-            op_code => return Err(EventImportError::UnknownEvent(op_code)),
+            op_code => return Err(SMDError::UnknownEvent(op_code)),
         })
     }
 }
@@ -129,7 +132,8 @@ impl NotePlay {
                 Some((u32::from(reader.read_to_u8()?) << 8) | (u32::from(reader.read_to_u8()?)))
             }
             0xC0 => Some(
-                (u32::from(reader.read_to_u8()?) << 16) | (u32::from(reader.read_to_u8()?) << 8)
+                (u32::from(reader.read_to_u8()?) << 16)
+                    | (u32::from(reader.read_to_u8()?) << 8)
                     | (u32::from(reader.read_to_u8()?)),
             ),
             _ => panic!(), // Unreachable

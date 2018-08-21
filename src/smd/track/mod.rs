@@ -1,10 +1,9 @@
 pub mod event;
 
 use self::event::Event;
-use ez_io::ReadE;
-use magic_number::check_magic_number;
-use std::error::Error;
+use ez_io::{MagicNumberCheck, ReadE};
 use std::io::{Read, Seek, SeekFrom};
+use Result;
 
 pub struct TrackChunk {
     pub track_id: u8,
@@ -13,8 +12,8 @@ pub struct TrackChunk {
 }
 
 impl TrackChunk {
-    pub fn import<R: Read + Seek>(reader: &mut R) -> Result<TrackChunk, Box<Error>> {
-        check_magic_number(reader, vec![b't', b'r', b'k', b' '])?;
+    pub fn import<R: Read + Seek>(reader: &mut R) -> Result<TrackChunk> {
+        reader.check_magic_number(&[b't', b'r', b'k', b' '])?;
         reader.seek(SeekFrom::Current(8))?;
         let chunk_end = u64::from(reader.read_le_to_u32()?) + reader.seek(SeekFrom::Current(0))?;
         let track_id = reader.read_to_u8()?;
